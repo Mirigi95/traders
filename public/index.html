@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbitrage Opportunities</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .opportunity {
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .opportunity h3 {
+            margin: 0 0 10px;
+            color: #495057;
+        }
+        .opportunity p {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #007bff;
+            animation: spin 1s ease infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Arbitrage Opportunities</h1>
+    <button id="fetchData">Fetch Arbitrage Data</button>
+    <div id="results"></div>
+    <div id="loading" class="loading" style="display:none;">
+        <div class="spinner"></div>Loading...
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            function fetchData() {
+                $('#loading').show();
+                $('#results').hide();
+                $.ajax({
+                    url: '/arbitrage',
+                    method: 'GET',
+                    success: function(data) {
+                        $('#loading').hide();
+                        $('#results').show();
+                        let resultsDiv = $('#results');
+                        resultsDiv.html('');
+
+                        if (data.length === 0) {
+                            resultsDiv.append('<p>No arbitrage opportunities found.</p>');
+                        } else {
+                            data.forEach(function(item) {
+                                resultsDiv.append(`
+                                    <div class="opportunity">
+                                        <h3>${item.symbol}</h3>
+                                        <p>Exchange 1: ${item.exchange1} - Price: ${item.price1}</p>
+                                        <p>Exchange 2: ${item.exchange2} - Price: ${item.price2}</p>
+                                        <p>Percentage Difference: ${item.percentageDifference}%</p>
+                                    </div>
+                                `);
+                            });
+                        }
+                    },
+                    error: function(error) {
+                        console.error(error);
+                        $('#loading').hide();
+                        $('#results').show();
+                        $('#results').html('<p>An error occurred while fetching data.</p>');
+                    }
+                });
+            }
+
+            $('#fetchData').click(function(){
+                fetchData();
+            });
+
+            // Fetch data every 5 minutes
+            setInterval(fetchData, 300000);
+        });
+    </script>
+</body>
+</html>
