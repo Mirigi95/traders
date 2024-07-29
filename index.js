@@ -10,12 +10,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Initialize exchanges with timeout options
 const exchanges = [
-    new ccxt.binance({ timeout: 20000 }),  // Binance with 20 seconds timeout
-    new ccxt.kraken({ timeout: 20000 }),   // Kraken with 20 seconds timeout
-    new ccxt.bybit({ timeout: 20000 }),    // Bybit with 20 seconds timeout
-    new ccxt.okx({ timeout: 20000 }),      // OKX with 20 seconds timeout
-    new ccxt.huobi({ timeout: 20000 }),    // Huobi with 20 seconds timeout
-    new ccxt.mexc({ timeout: 20000 })      // MEXC with 20 seconds timeout
+    new ccxt.binance({ timeout: 50000 }),  // Binance with 20 seconds timeout
+    new ccxt.kraken({ timeout: 50000 }),   // Kraken with 20 seconds timeout
+    new ccxt.bybit({ timeout: 50000 }),    // Bybit with 20 seconds timeout
+    new ccxt.okx({ timeout: 50000 }),      // OKX with 20 seconds timeout
+    new ccxt.huobi({ timeout: 50000 }),    // Huobi with 20 seconds timeout
+    new ccxt.mexc({ timeout: 50000 })      // MEXC with 20 seconds timeout
 ];
 
 async function fetchSymbols() {
