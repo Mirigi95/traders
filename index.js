@@ -99,5 +99,8 @@ app.get('/arbitrage', async (req, res) => {
     }
 });
 
-module.exports = app; // Export the app for Vercel
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+});
 
+module.exports = app; // Export the app for Vercel
