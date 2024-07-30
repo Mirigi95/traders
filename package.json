@@ -1,26 +1,19 @@
 {
-    "name": "crypto-arbitrage",
-    "version": "1.0.0",
-    "description": "A Node.js app to find crypto arbitrage opportunities.",
-    "main": "index.js",
-    "scripts": {
-      "start": "node index.js"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-      "ccxt": "^4.3.68",
-      "express": "^4.19.2"
-    },
-<<<<<<< HEAD
-    "devDependencies": {
-      "nodemon": "^2.0.15"
-    }
-  }
-=======
-      "devDependencies": {
+  "name": "crypto-arbitrage",
+  "version": "1.0.0",
+  "description": "A Node.js app to find crypto arbitrage opportunities.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "mirigi dan",
+  "license": "ISC",
+  "dependencies": {
+    "ccxt": "^4.3.68",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
     "nodemon": "^2.0.15"
   }
-  }
->>>>>>> origin/main
+}
