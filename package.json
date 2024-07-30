@@ -13,7 +13,14 @@
       "ccxt": "^4.3.68",
       "express": "^4.19.2"
     },
+<<<<<<< HEAD
     "devDependencies": {
       "nodemon": "^2.0.15"
     }
   }
+=======
+      "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+  }
+>>>>>>> origin/main
