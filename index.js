@@ -19,21 +19,22 @@ const exchanges = [
 ];
 
 async function fetchSymbols() {
-    const symbolsPerExchange = {};
-    for (const exchange of exchanges) {
+    const promises = exchanges.map(async (exchange) => {
         try {
             const symbols = await exchange.loadMarkets();
-            symbolsPerExchange[exchange.id] = Object.keys(symbols);
+            return { [exchange.id]: Object.keys(symbols) };
         } catch (e) {
             console.error(`Error fetching markets from ${exchange.id}:`, e);
-            symbolsPerExchange[exchange.id] = [];
+            return { [exchange.id]: [] };
         }
-    }
-    return symbolsPerExchange;
+    });
+
+    const results = await Promise.all(promises);
+    return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
 }
 
 function findCommonSymbols(symbolsPerExchange) {
-    let commonSymbols = new Set(symbolsPerExchange[exchanges[0].id]);
+    let commonSymbols = new Set(Object.values(symbolsPerExchange)[0]);
     for (const symbols of Object.values(symbolsPerExchange)) {
         commonSymbols = new Set([...commonSymbols].filter(x => symbols.includes(x)));
     }
@@ -41,44 +42,42 @@ function findCommonSymbols(symbolsPerExchange) {
 }
 
 async function fetchPricesForCommonSymbols(commonSymbols) {
-    const commonSymbolPrices = {};
-    for (const symbol of commonSymbols) {
-        commonSymbolPrices[symbol] = {};
-        for (const exchange of exchanges) {
+    const promises = [...commonSymbols].map(async (symbol) => {
+        const prices = await Promise.all(exchanges.map(async (exchange) => {
             try {
                 const ticker = await exchange.fetchTicker(symbol);
-                commonSymbolPrices[symbol][exchange.id] = ticker['last'];
+                return { [exchange.id]: ticker['last'] };
             } catch (e) {
                 console.error(`Error fetching ticker for ${symbol} from ${exchange.id}:`, e);
-                // Remove symbol for the current exchange to avoid issues later
-                delete commonSymbolPrices[symbol][exchange.id];
+                return { [exchange.id]: undefined };
             }
-        }
-    }
-    return commonSymbolPrices;
+        }));
+        return { [symbol]: Object.assign({}, ...prices) };
+    });
+
+    const results = await Promise.all(promises);
+    return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
 }
 
 function checkArbitrageOpportunities(commonSymbolPrices) {
     const arbitrageOpportunities = [];
     for (const [symbol, prices] of Object.entries(commonSymbolPrices)) {
-        const exchangePrices = Object.entries(prices);
+        const exchangePrices = Object.entries(prices).filter(([_, price]) => price !== undefined);
         for (let i = 0; i < exchangePrices.length; i++) {
             for (let j = i + 1; j < exchangePrices.length; j++) {
                 const [exchange1, price1] = exchangePrices[i];
                 const [exchange2, price2] = exchangePrices[j];
-                if (price1 !== undefined && price2 !== undefined) {
-                    const priceDifference = Math.abs(price1 - price2);
-                    const percentageDifference = (priceDifference / ((price1 + price2) / 2)) * 100;
-                    if (percentageDifference > 0.5) {
-                        arbitrageOpportunities.push({
-                            symbol: symbol,
-                            exchange1: exchange1,
-                            price1: price1,
-                            exchange2: exchange2,
-                            price2: price2,
-                            percentageDifference: percentageDifference.toFixed(2)
-                        });
-                    }
+                const priceDifference = Math.abs(price1 - price2);
+                const percentageDifference = (priceDifference / ((price1 + price2) / 2)) * 100;
+                if (percentageDifference > 0.5) {
+                    arbitrageOpportunities.push({
+                        symbol,
+                        exchange1,
+                        price1,
+                        exchange2,
+                        price2,
+                        percentageDifference: percentageDifference.toFixed(2)
+                    });
                 }
             }
         }
