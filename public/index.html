@@ -16,128 +16,69 @@
             text-align: center;
             color: #007bff;
         }
-        button {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #results {
-            margin-top: 20px;
+        .container {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .opportunity {
-            background-color: white;
-            border: 1px solid #ced4da;
+        .opportunity-card {
+            background-color: #fff;
             border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+            max-width: 800px;
+            margin: 10px 0;
+            padding: 15px;
+            box-sizing: border-box;
         }
-        .opportunity h3 {
-            margin: 0 0 10px;
-            color: #495057;
+        .card-header {
+            font-size: 1.2em;
+            color: #007bff;
+            margin-bottom: 10px;
         }
-        .opportunity p {
-            margin: 5px 0;
-            color: #6c757d;
+        .card-content {
+            display: flex; flex-direction: column;
+            justify-content: space-between;
+            font-size: 16px;
         }
-        .opportunity .percentage {
+        .card-content div {
+            flex: 1;
+            margin: 0 5px;
+        }
+        .card-content div:nth-child(odd) {
             font-weight: bold;
-        }
-         .opportunity-percentage-high {
-            color: green;
-        }
-        .percentage-low {
-            color: #dc3545;
-        }
-        .loading {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .spinner {
-            border: 4px solid rgba(0,0,0,0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: #007bff;
-            animation: spin 1s ease infinite;
-            display: inline-block;
-            margin-right: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <h1>Arbitrage Opportunities</h1>
-    <button id="fetchData">Fetch Arbitrage Data</button>
-    <div id="results"></div>
-    <div id="loading" class="loading" style="display:none;">
-        <div class="spinner"></div>Loading...
-    </div>
-
+    <div class="container" id="arbitrage-container"></div>
     <script>
-        $(document).ready(function(){
-            function fetchData() {
-                $('#loading').show();
-                $('#results').hide();
-                $.ajax({
-                    url: '/arbitrage',
-                    method: 'GET',
-                    success: function(data) {
-                        $('#loading').hide();
-                        $('#results').show();
-                        let resultsDiv = $('#results');
-                        resultsDiv.html('');
-
-                        if (data.length === 0) {
-                            resultsDiv.append('<p>No arbitrage opportunities found.</p>');
-                        } else {
-                            data.forEach(function(item) {
-                                let percentageClass = item.percentageDifference > 1 ? 'percentage-high' : 'percentage-low';
-                                resultsDiv.append(`
-                                    <div class="opportunity">
-                                        <h3>${item.symbol}</h3>
-                                        <p>Exchange 1: ${item.exchange1} - Price: ${item.price1}</p>
-                                        <p>Exchange 2: ${item.exchange2} - Price: ${item.price2}</p>
-                                        <p class="percentage-${percentageClass}">Percentage Difference: ${item.percentageDifference}%</p>
-                                    </div>
-                                `);
-                            });
+        $(document).ready(function () {
+            function fetchArbitrageOpportunities() {
+                $.getJSON('/arbitrage', function (data) {
+                    const container = $('#arbitrage-container');
+                    container.empty();
+                    data.forEach(opportunity => {
+                        const card = `<div class="opportunity-card">
+                            <div class="card-header">Opportunity for ${opportunity.symbol}</div>
+                            <div class="card-content">
+                                <div>Exchange 1: ${opportunity.exchange1}</div>
+                                <div>Price 1: ${opportunity.price1}</div>
+                                <div>Exchange 2: ${opportunity.exchange2}</div>
+                                <div>Price 2: ${opportunity.price2}</div>
+                                <div>Difference: ${opportunity.percentageDifference}%</div>
+                            </div>
+                        </div>`;
+                        container.append(card);
+                        if(opportunity.percentageDifference > 1){
+                            container.find('.opportunity-card:last .card-content').css('background', '#30ce6077');
                         }
-                    },
-                    error: function(error) {
-                        console.error(error);
-                        $('#loading').hide();
-                        $('#results').show();
-                        $('#results').html('<p>An error occurred while fetching data.</p>');
-                    }
+                    });
                 });
             }
-
-            $('#fetchData').click(function(){
-                fetchData();
-            });
-
-            // Fetch data every 5 minutes
-            setInterval(fetchData, 350000);
+            fetchArbitrageOpportunities();
+            setInterval(fetchArbitrageOpportunities, 120000); // Fetch every 2 minutes
         });
     </script>
 </body>
