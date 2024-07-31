@@ -31,6 +31,9 @@
         }
         #results {
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .opportunity {
             background-color: white;
@@ -39,6 +42,11 @@
             padding: 15px;
             margin-bottom: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         .opportunity h3 {
             margin: 0 0 10px;
@@ -47,6 +55,15 @@
         .opportunity p {
             margin: 5px 0;
             color: #6c757d;
+        }
+        .opportunity .percentage {
+            font-weight: bold;
+        }
+        .percentage-high {
+            color: green;
+        }
+        .percentage-low {
+            color: #dc3545;
         }
         .loading {
             text-align: center;
@@ -94,12 +111,13 @@
                             resultsDiv.append('<p>No arbitrage opportunities found.</p>');
                         } else {
                             data.forEach(function(item) {
+                                let percentageClass = item.percentageDifference > 1 ? 'percentage-high' : 'percentage-low';
                                 resultsDiv.append(`
                                     <div class="opportunity">
                                         <h3>${item.symbol}</h3>
                                         <p>Exchange 1: ${item.exchange1} - Price: ${item.price1}</p>
                                         <p>Exchange 2: ${item.exchange2} - Price: ${item.price2}</p>
-                                        <p>Percentage Difference: ${item.percentageDifference}%</p>
+                                        <p class="percentage ${percentageClass}">Percentage Difference: ${item.percentageDifference}%</p>
                                     </div>
                                 `);
                             });
