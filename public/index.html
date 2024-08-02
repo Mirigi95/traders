@@ -18,42 +18,40 @@
             margin-bottom: 20px;
         }
         .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+            padding: 0 10px;
         }
         .opportunity-card {
             background-color: #fff;
-            border-radius: 5px;
+            border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 800px;
-            margin: 10px 0;
             padding: 15px;
-            box-sizing: border-box;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .opportunity-card:hover {
+            transform: scale(1.03);
         }
         .card-header {
-            font-size: 1.2em;
+            font-size: 1.5em;
             color: #007bff;
             margin-bottom: 10px;
         }
         .card-content {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            font-size: 20px;
+            flex-direction: column;
+            font-size: 16px;
         }
         .card-content div {
-            flex: 1 1 calc(50% - 10px);
-            margin: 5px;
-            box-sizing: border-box;
+            margin: 5px 0;
         }
-        .card-content div:nth-child(odd) {
-            font-weight: bold;
+        .card-content div h3 {
+            margin: 0;
         }
-
-        /* Loading animation */
+        .card-content div h2 {
+            margin: 0;
+        }
         .loading-container {
             display: flex;
             justify-content: center;
@@ -79,16 +77,10 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        @media (max-width: 600px) {
-            .card-content div {
-                flex: 1 1 100%;
-                margin: 5px 0;
-            }
-        }
     </style>
 </head>
 <body>
+
     <h1>Arbitrage Opportunities</h1>
     <div class="loading-container" id="loading-container">
         <div class="spinner"></div>
@@ -98,37 +90,44 @@
     <script>
         $(document).ready(function () {
             function fetchArbitrageOpportunities() {
-                $('#loading-container').show(); // Show loading animation
-                $('#arbitrage-container').hide(); // Hide content during loading
+                $('#loading-container').show();
+                $('#arbitrage-container').hide();
                 $.getJSON('/arbitrage', function (data) {
                     const container = $('#arbitrage-container');
                     container.empty();
-                    data.forEach(opportunity => {
-                        const card = `<div class="opportunity-card">
-                            <div class="card-header">Opportunity for ${opportunity.symbol}</div>
-                            <div class="card-content">
-                                <div>Exchange 1: ${opportunity.exchange1}</div>
-                                <div>Price 1: ${opportunity.price1}</div>
-                                <div>Exchange 2: ${opportunity.exchange2}</div>
-                                <div>Price 2: ${opportunity.price2}</div>
-                                <div>Difference: ${opportunity.percentageDifference}%</div>
-                            </div>
-                        </div>`;
+                    data.forEach((opportunity) => {
+                        const card = `
+                            <div class="opportunity-card">
+                                <div class="card-header">${opportunity.symbol}</div>
+                                <div class="card-content">
+                                    <div class="arbit-exchange">
+                                        <h3>${opportunity.exchange1}</h3>
+                                        <h2>${opportunity.price1}</h2>
+                                    </div>
+                                    <div class="arbit-exchange">
+                                        <h3>${opportunity.exchange2}</h3>
+                                        <h2>${opportunity.price2}</h2>
+                                    </div>
+                                    <div class="arbit-difference">
+                                        <h2>${opportunity.percentageDifference}%</h2>
+                                    </div>
+                                </div>
+                            </div>`;
                         container.append(card);
-                        if(opportunity.percentageDifference > 1){
-                            container.find('.opportunity-card:last .card-content').css('background', 'green');
+                        if (opportunity.percentageDifference > 1) {
+                            container.find('.opportunity-card:last').css({'background': 'green', 'color': 'white'});
                         }
                     });
-                    $('#loading-container').hide(); // Hide loading animation
-                    $('#arbitrage-container').show(); // Show content after loading
+                    $('#loading-container').hide();
+                    $('#arbitrage-container').show();
                 }).fail(function() {
-                    $('#loading-container').hide(); // Hide loading animation on error
+                    $('#loading-container').hide();
                     $('#arbitrage-container').show().html('<p>Error loading data. Please try again later.</p>');
                 });
             }
 
             fetchArbitrageOpportunities();
-            setInterval(fetchArbitrageOpportunities, 300000); // Fetch every 2 minutes
+            setInterval(fetchArbitrageOpportunities, 240000);
         });
     </script>
 </body>
